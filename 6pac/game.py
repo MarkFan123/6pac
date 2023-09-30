@@ -42,86 +42,82 @@ while running:
     elapsed_time = (current_time - start_time) // 1000 
 
     current_x, current_y = pacman_x, pacman_y
-    way = get_next_coordinate(grid, (current_x, current_y))
+    path = get_next_coordinate(grid, (current_x, current_y))
     
-    for this in range(len(way)):
-        screen.fill(BLACK)
-        path=way[this]
-        
-        if path is None or len(path) == 0 or path[0] is None:
-            print("Invalid Path. Try something else")
-            running = False
-            continue
+    if path is None or len(path) == 0 or path[0] is None:
+        print("Invalid Path. Try something else")
+        running = False
+        continue
 
-        pacman_x, pacman_y = path
+    pacman_x, pacman_y = path
 
+    orientation_angle = 0
+    if pacman_x < current_x:
+        orientation_angle = 180
+    elif pacman_x > current_x:
         orientation_angle = 0
-        if pacman_x < current_x:
-            orientation_angle = 180
-        elif pacman_x > current_x:
-            orientation_angle = 0
-        elif pacman_y < current_y:
-            orientation_angle = -90
-        elif pacman_y > current_y:
-            orientation_angle = 90
+    elif pacman_y < current_y:
+        orientation_angle = -90
+    elif pacman_y > current_y:
+        orientation_angle = 90
+    
+    
+    if grid[pacman_x][pacman_y] == o:
+        grid[pacman_x][pacman_y] = e
+        score += 10
         
-        
-        if grid[pacman_x][pacman_y] == o:
-            grid[pacman_x][pacman_y] = e
-            score += 10
-            
-        # Draw the grid
-        pellet = False
-        for row in range(GRID_WIDTH):
-            for col in range(GRID_HEIGHT):
-                grid_unit = grid[row][col]
-                cell_x = row * GRID_SIZE
-                cell_y = col * GRID_SIZE
-                if grid_unit == I:
-                    pygame.draw.rect(screen, BLUE, (cell_x, cell_y, 19, 19))
-                elif grid_unit == e:
-                    pygame.draw.rect(screen, BLACK, (cell_x, cell_y, GRID_SIZE, GRID_SIZE))
-                elif grid_unit == o:
-                    pellet = True
-                    pygame.draw.circle(screen, WHITE, (cell_x + GRID_SIZE // 2, cell_y + GRID_SIZE // 2), 5)
-                elif grid_unit == O:
-                    pygame.draw.circle(screen, WHITE, (cell_x + GRID_SIZE // 2, cell_y + GRID_SIZE // 2), 10)
-                elif grid_unit == c:
-                    pygame.draw.circle(screen, RED, (cell_x + GRID_SIZE // 2, cell_y + GRID_SIZE // 2), 5)
+    # Draw the grid
+    pellet = False
+    for row in range(GRID_WIDTH):
+        for col in range(GRID_HEIGHT):
+            grid_unit = grid[row][col]
+            cell_x = row * GRID_SIZE
+            cell_y = col * GRID_SIZE
+            if grid_unit == I:
+                pygame.draw.rect(screen, BLUE, (cell_x, cell_y, 19, 19))
+            elif grid_unit == e:
+                pygame.draw.rect(screen, BLACK, (cell_x, cell_y, GRID_SIZE, GRID_SIZE))
+            elif grid_unit == o:
+                pellet = True
+                pygame.draw.circle(screen, WHITE, (cell_x + GRID_SIZE // 2, cell_y + GRID_SIZE // 2), 5)
+            elif grid_unit == O:
+                pygame.draw.circle(screen, WHITE, (cell_x + GRID_SIZE // 2, cell_y + GRID_SIZE // 2), 10)
+            elif grid_unit == c:
+                pygame.draw.circle(screen, RED, (cell_x + GRID_SIZE // 2, cell_y + GRID_SIZE // 2), 5)
 
-        if not pellet:
-            running = False
+    if not pellet:
+        running = False
 
-    # Draw Pac-Man body
-        pacman_radius = GRID_SIZE // 2 - 2 
-        pacman_rect = pygame.Rect(pacman_x * GRID_SIZE, pacman_y * GRID_SIZE, GRID_SIZE, GRID_SIZE)
-        pygame.draw.circle(screen, YELLOW, (pacman_x * GRID_SIZE + GRID_SIZE // 2, pacman_y * GRID_SIZE + GRID_SIZE // 2), pacman_radius)
+   # Draw Pac-Man body
+    pacman_radius = GRID_SIZE // 2 - 2 
+    pacman_rect = pygame.Rect(pacman_x * GRID_SIZE, pacman_y * GRID_SIZE, GRID_SIZE, GRID_SIZE)
+    pygame.draw.circle(screen, YELLOW, (pacman_x * GRID_SIZE + GRID_SIZE // 2, pacman_y * GRID_SIZE + GRID_SIZE // 2), pacman_radius)
 
-        # Draw Pac-Man mouth
-        mouth_points = [(pacman_x * GRID_SIZE + GRID_SIZE // 2, pacman_y * GRID_SIZE + GRID_SIZE // 2)]
-        mouth_angle = 40 
-        for angle in range(orientation_angle - mouth_angle, orientation_angle + mouth_angle + 1):
-            x = pacman_x * GRID_SIZE + GRID_SIZE // 2 + pacman_radius * math.cos(math.radians(angle))
-            y = pacman_y * GRID_SIZE + GRID_SIZE // 2 + pacman_radius * math.sin(math.radians(angle))
-            mouth_points.append((x, y))
+    # Draw Pac-Man mouth
+    mouth_points = [(pacman_x * GRID_SIZE + GRID_SIZE // 2, pacman_y * GRID_SIZE + GRID_SIZE // 2)]
+    mouth_angle = 40 
+    for angle in range(orientation_angle - mouth_angle, orientation_angle + mouth_angle + 1):
+        x = pacman_x * GRID_SIZE + GRID_SIZE // 2 + pacman_radius * math.cos(math.radians(angle))
+        y = pacman_y * GRID_SIZE + GRID_SIZE // 2 + pacman_radius * math.sin(math.radians(angle))
+        mouth_points.append((x, y))
 
-        mouth_points.append((pacman_x * GRID_SIZE + GRID_SIZE // 2, pacman_y * GRID_SIZE + GRID_SIZE // 2))
-        pygame.draw.polygon(screen, BLACK, mouth_points)
+    mouth_points.append((pacman_x * GRID_SIZE + GRID_SIZE // 2, pacman_y * GRID_SIZE + GRID_SIZE // 2))
+    pygame.draw.polygon(screen, BLACK, mouth_points)
 
-        font = pygame.font.Font(None, 24)
-        score_text = font.render(f"Score: {score}", True, WHITE)
-        screen.blit(score_text, (4, 16*17))
+    font = pygame.font.Font(None, 24)
+    score_text = font.render(f"Score: {score}", True, WHITE)
+    screen.blit(score_text, (4, 16*17))
 
-        time_text = font.render("Time:", True, WHITE)
-        screen.blit(time_text, (4, 340))
-        time_text = font.render(f"{elapsed_time} seconds", True, WHITE)
-        screen.blit(time_text, (4, 370))
-        
+    time_text = font.render("Time:", True, WHITE)
+    screen.blit(time_text, (4, 340))
+    time_text = font.render(f"{elapsed_time} seconds", True, WHITE)
+    screen.blit(time_text, (4, 370))
 
-        pygame.display.flip()
+    pygame.display.flip()
 
-        clock.tick(2)
-        
+    clock.tick(2)
+
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
